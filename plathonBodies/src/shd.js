@@ -15,7 +15,8 @@ function dsRndShader(gl) {
     ];
     let proms = [];
     for (let i = 0; i < shds.length; i++) {
-      const buf = "bin/shaders/" + fileNamePrefix + "/" + shds[i][0] + ".glsl";
+      const buf =
+        "../bin/shaders/" + fileNamePrefix + "/" + shds[i][0] + ".glsl";
 
       proms[i] = fetch(buf)
         .then((res) => res.text())

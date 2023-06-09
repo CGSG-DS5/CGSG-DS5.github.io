@@ -14,7 +14,7 @@
         height="100px"
       />
     </form>
-    <script type="text/javascript" src="control.js"></script>
+    <script type="text/javascript" src="../src/control.js"></script>
     <div>
       <input id="pause" type="checkbox" onclick="setPause(this)" />Pause
       <span id="fps">FPS: 47.00</span>
@@ -33,22 +33,22 @@
       onmousewheel="camCtrl(event)"
       onmousemove="camCtrl(event)"
     ></canvas>
-    <script type="text/javascript" src="mth.js"></script>
-    <script type="text/javascript" src="mthvec2.js"></script>
-    <script type="text/javascript" src="mthvec3.js"></script>
-    <script type="text/javascript" src="mthmat4.js"></script>
-    <script type="text/javascript" src="rnd.js"></script>
-    <script type="text/javascript" src="buffer.js"></script>
-    <script type="text/javascript" src="shd.js"></script>
-    <script type="text/javascript" src="mtl.js"></script>
-    <script type="text/javascript" src="timer.js"></script>
-    <script type="text/javascript" src="plathon.js"></script>
+    <script type="text/javascript" src="../src/mth.js"></script>
+    <script type="text/javascript" src="../src/mthvec2.js"></script>
+    <script type="text/javascript" src="../src/mthvec3.js"></script>
+    <script type="text/javascript" src="../src/mthmat4.js"></script>
+    <script type="text/javascript" src="../src/rnd.js"></script>
+    <script type="text/javascript" src="../src/buffer.js"></script>
+    <script type="text/javascript" src="../src/shd.js"></script>
+    <script type="text/javascript" src="../src/mtl.js"></script>
+    <script type="text/javascript" src="../src/timer.js"></script>
+    <script type="text/javascript" src="../src/plathon.js"></script>
     <script type="text/javascript">
       let dsRnd = new dsRender();
       let myTimer = new dsTimer();
     </script>
 
-    <script type="text/javascript" src="mthcam.js"></script>
+    <script type="text/javascript" src="../src/mthcam.js"></script>
     <script type="text/javascript">
       window.addEventListener("load", () => {
         window.addEventListener("keydown", pause);
@@ -127,7 +127,7 @@
         let pr4 = createIcosahedron(matrIdentity());
         pr4.mtlNo = emerald;
 
-        let prom = dsRnd.primLoad("bin/models/cow.obj");
+        let prom = dsRnd.primLoad("../bin/models/cow.obj");
         let pr5;
         prom.then((res) => {
           pr5 = res;

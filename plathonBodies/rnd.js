@@ -1,3 +1,46 @@
+function countNormals(v, ind) {
+  for (let i = 0; i < v.length; i++) v[i].n = vec3(0);
+
+  if (ind !== null)
+    for (let i = 0; i + 2 < ind.length; i += 3) {
+      let n = v[ind[i + 1]].p
+        .sub(v[ind[i]].p)
+        .cross(v[ind[i + 2]].p.sub(v[ind[i]].p))
+        .norm();
+      v[ind[i]].n = v[ind[i]].n.add(n).norm();
+      v[ind[i + 1]].n = v[ind[i + 1]].n.add(n).norm();
+      v[ind[i + 2]].n = v[ind[i + 2]].n.add(n).norm();
+    }
+  else
+    for (let i = 0; i + 2 < v.length; i += 3) {
+      let n = v[i + 1].p
+        .sub(v[i].p)
+        .cross(v[i + 2].p.sub(v[i].p))
+        .norm();
+      v[i].n = v[i].n.add(n).norm();
+      v[i + 1].n = v[i + 1].n.add(n).norm();
+      v[i + 2].n = v[i + 2].n.add(n).norm();
+    }
+}
+
+function countBB(v) {
+  let min = vec3(v[0].p),
+    max = vec3(v[0].p);
+
+  for (let i = 1; i < v.length; i++) {
+    if (v[i].p.x < min.x) min.x = v[i].p.x;
+    else if (v[i].p.x > max.x) max.x = v[i].p.x;
+
+    if (v[i].p.y < min.y) min.y = v[i].p.y;
+    else if (v[i].p.y > max.y) max.y = v[i].p.y;
+
+    if (v[i].p.z < min.z) min.z = v[i].p.z;
+    else if (v[i].p.z > max.z) max.z = v[i].p.z;
+  }
+
+  return [min, max];
+}
+
 class _dsVert {
   constructor(p, t, n, c) {
     if (p === undefined) {
@@ -49,9 +92,9 @@ function mat2floatArr(arr, mat) {
 
 // Primitive class
 class dsPrim {
-  constructor(type, v, numOfV, ind, numOfI) {
+  constructor(type, v, ind) {
     this.vBuf = this.vA = this.iBuf = 0;
-    if (v !== null && numOfV !== 0) {
+    if (v !== null) {
       let primVertexArray = window.gl.createVertexArray();
       window.gl.bindVertexArray(primVertexArray);
 
@@ -60,7 +103,7 @@ class dsPrim {
       this.vBuf = new vertex_buffer(pos);
       this.vA = primVertexArray;
     }
-    if (ind !== null && numOfI !== 0) {
+    if (ind !== null) {
       let primIndexBuffer = window.gl.createBuffer();
       window.gl.bindBuffer(window.gl.ELEMENT_ARRAY_BUFFER, primIndexBuffer);
       window.gl.bufferData(
@@ -75,12 +118,13 @@ class dsPrim {
       );
 
       this.iBuf = new index_buffer(ind);
-      this.numOfElements = numOfI;
-    } else this.numOfElements = numOfV;
+      this.numOfElements = ind.length;
+    } else this.numOfElements = v.length;
 
     this.trans = matrIdentity();
     this.type = type;
     this.mtlNo = 0;
+    [this.minBB, this.maxBB] = countBB(v);
   }
 
   // Primitive free function
@@ -190,6 +234,57 @@ function dsRender() {
   // Render close method
   this.close = () => {
     this.mtl.free();
+  };
+
+  this.primLoad = (fileName) => {
+    return new Promise((resolve, reject) => {
+      let v = [],
+        ind = [],
+        nv;
+
+      fetch(fileName)
+        .then((res) => res.text())
+        .then((data) => {
+          const lines = data.split("\n");
+          for (let i = 0; i < lines.length; i++) {
+            const buf = lines[i].split(" ");
+            if (buf[0] === "v") nv++;
+          }
+
+          for (let i = 0; i < lines.length; i++) {
+            const buf = lines[i].split(" ");
+            if (buf[0] === "v") {
+              let x = parseFloat(buf[1]),
+                y = parseFloat(buf[2]),
+                z = parseFloat(buf[3]);
+
+              v.push(dsVert(vec3(x, y, z), vec2(0), vec3(0), vec3(0)));
+            } else if (buf[0] == "f") {
+              let n = 0,
+                c0 = 0,
+                c1 = 0;
+              for (j = 1; j < buf.length; j++) {
+                c = parseInt(buf[j]);
+                if (c < 0) c += nv;
+                else c--;
+
+                if (n === 0) c0 = c;
+                else if (n === 1) c1 = c;
+                else {
+                  ind.push(c0);
+                  ind.push(c1);
+                  ind.push(c);
+                  c1 = c;
+                }
+                n++;
+              }
+            }
+          }
+          countNormals(v, ind);
+
+          resolve(new dsPrim(gl.TRIANGLES, v, ind));
+        });
+    });
   };
 
   return this;

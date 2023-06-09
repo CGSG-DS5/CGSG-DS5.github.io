@@ -2,11 +2,11 @@ function makeV(v, ind) {
   let res = [];
   if (ind !== null)
     for (i = 0; i < ind.length; i++) {
-      res[i] = new dsVert(v[ind[i]], vec2(0), vec3(0), vec3(0));
+      res[i] = dsVert(v[ind[i]], vec2(0), vec3(0), vec3(0));
     }
   else
     for (i = 0; i < v.length; i++) {
-      res[i] = new dsVert(v[i], vec2(0), vec3(0), vec3(0));
+      res[i] = dsVert(v[i], vec2(0), vec3(0), vec3(0));
     }
   return res;
 }
@@ -17,31 +17,6 @@ function makeVecs(v, ind) {
     res[i] = vec3(v[ind[i]].x, v[ind[i]].y, v[ind[i]].z);
   }
   return res;
-}
-
-function countNormals(v, ind) {
-  for (let i = 0; i < v.length; i++) v[i].n = vec3(0);
-
-  if (ind !== null)
-    for (let i = 0; i + 2 < ind.length; i += 3) {
-      let n = v[ind[i + 1]].p
-        .sub(v[ind[i]].p)
-        .cross(v[ind[i + 2]].p.sub(v[ind[i]].p))
-        .norm();
-      v[ind[i]].n = v[ind[i]].n.add(n).norm();
-      v[ind[i + 1]].n = v[ind[i + 1]].n.add(n).norm();
-      v[ind[i + 2]].n = v[ind[i + 2]].n.add(n).norm();
-    }
-  else
-    for (let i = 0; i + 2 < v.length; i += 3) {
-      let n = v[i + 1].p
-        .sub(v[i].p)
-        .cross(v[i + 2].p.sub(v[i].p))
-        .norm();
-      v[i].n = v[i].n.add(n).norm();
-      v[i + 1].n = v[i + 1].n.add(n).norm();
-      v[i + 2].n = v[i + 2].n.add(n).norm();
-    }
 }
 
 function createTetrahedron(matr) {
@@ -60,7 +35,7 @@ function createTetrahedron(matr) {
 
   countNormals(v, null);
 
-  let pr = new dsPrim(window.gl.TRIANGLES, v, v.length, null, 0);
+  let pr = new dsPrim(window.gl.TRIANGLES, v, null);
   pr.trans = matr;
   return pr;
 }
@@ -87,7 +62,7 @@ function createHexahedron(matr) {
 
   countNormals(v, null);
 
-  let pr = new dsPrim(window.gl.TRIANGLES, v, v.length, null, 0);
+  let pr = new dsPrim(window.gl.TRIANGLES, v, null);
   pr.trans = matr;
   return pr;
 }
@@ -110,7 +85,7 @@ function createOctahedron(matr) {
 
   countNormals(v, null);
 
-  let pr = new dsPrim(window.gl.TRIANGLES, v, v.length, null, 0);
+  let pr = new dsPrim(window.gl.TRIANGLES, v, null);
   pr.trans = matr;
   return pr;
 }
@@ -220,7 +195,7 @@ function createDodecahedron(matr) {
 
   countNormals(v, null);
 
-  let pr = new dsPrim(window.gl.TRIANGLES, v, v.length, null, 0);
+  let pr = new dsPrim(window.gl.TRIANGLES, v, null);
   pr.trans = matr;
   return pr;
 }
@@ -310,7 +285,7 @@ function createIcosahedron(matr) {
 
   countNormals(v, null);
 
-  let pr = new dsPrim(window.gl.TRIANGLES, v, v.length, null, 0);
+  let pr = new dsPrim(window.gl.TRIANGLES, v, null);
   pr.trans = matr;
   return pr;
 }

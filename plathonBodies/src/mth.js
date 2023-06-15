@@ -1,7 +1,7 @@
-function d2r(a) {
+export function d2r(a) {
   return a * (Math.PI / 180.0);
 }
 
-function r2d(a) {
+export function r2d(a) {
   return a * (180.0 / Math.PI);
 }

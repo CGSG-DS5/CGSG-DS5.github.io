@@ -1,4 +1,4 @@
-class buffer {
+export class buffer {
   constructor(type, size) {
     this.id = window.gl.createBuffer();
     this.type = type;
@@ -22,7 +22,7 @@ class buffer {
   }
 }
 
-class vertex_buffer extends buffer {
+export class vertex_buffer extends buffer {
   constructor(vertices) {
     super(window.gl.ARRAY_BUFFER, (3 + 2 + 3 + 3) * 4 * vertices.length);
     this.numOfVertices = vertices.length;
@@ -49,7 +49,7 @@ class vertex_buffer extends buffer {
   }
 }
 
-class index_buffer extends buffer {
+export class index_buffer extends buffer {
   constructor(indices) {
     super(window.gl.ELEMENT_ARRAY_BUFFER, 2 * indices.length);
     this.numOfIndices = indices.length;
@@ -76,7 +76,7 @@ class index_buffer extends buffer {
   }
 }
 
-class uniform_buffer extends buffer {
+export class uniform_buffer extends buffer {
   constructor(name, size, bindingPoint) {
     super(window.gl.UNIFORM_BUFFER, size);
     window.gl.bufferData(window.gl.UNIFORM_BUFFER, size, window.gl.STATIC_DRAW);

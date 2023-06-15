@@ -1,4 +1,6 @@
-class _mat4 {
+import { r2d, d2r } from "./mth.js";
+
+export class _mat4 {
   constructor(x) {
     if (typeof x === "object") {
       if (typeof x[0] === "object") {
@@ -325,11 +327,11 @@ class _mat4 {
   };
 }
 
-function mat4(...args) {
+export function mat4(...args) {
   return new _mat4(...args);
 }
 
-function matrIdentity() {
+export function matrIdentity() {
   return mat4([
     [1, 0, 0, 0],
     [0, 1, 0, 0],
@@ -338,7 +340,7 @@ function matrIdentity() {
   ]);
 }
 
-matrDeterm3x3 = (a11, a12, a13, a21, a22, a23, a31, a32, a33) => {
+export function matrDeterm3x3(a11, a12, a13, a21, a22, a23, a31, a32, a33) {
   return (
     a11 * a22 * a33 +
     a12 * a23 * a31 +
@@ -347,27 +349,27 @@ matrDeterm3x3 = (a11, a12, a13, a21, a22, a23, a31, a32, a33) => {
     a12 * a21 * a33 -
     a13 * a22 * a31
   );
-};
+}
 
-matrTranslate = (t) => {
+export function matrTranslate(t) {
   return mat4([
     [1, 0, 0, 0],
     [0, 1, 0, 0],
     [0, 0, 1, 0],
     [t.x, t.y, t.z, 1],
   ]);
-};
+}
 
-matrScale = (s) => {
+export function matrScale(s) {
   return mat4([
     [s.x, 0, 0, 0],
     [0, s.y, 0, 0],
     [0, 0, s.z, 0],
     [0, 0, 0, 1],
   ]);
-};
+}
 
-matrRotateX = (angleInDegree) => {
+export function matrRotateX(angleInDegree) {
   const a = d2r(angleInDegree);
   return mat4([
     [1, 0, 0, 0],
@@ -375,9 +377,9 @@ matrRotateX = (angleInDegree) => {
     [0, -Math.sin(a), Math.cos(a), 0],
     [0, 0, 0, 1],
   ]);
-};
+}
 
-matrRotateY = (angleInDegree) => {
+export function matrRotateY(angleInDegree) {
   const a = d2r(angleInDegree);
   return mat4([
     [Math.cos(a), 0, -Math.sin(a), 0],
@@ -385,9 +387,9 @@ matrRotateY = (angleInDegree) => {
     [Math.sin(a), 0, Math.cos(a), 0],
     [0, 0, 0, 1],
   ]);
-};
+}
 
-matrRotateZ = (angleInDegree) => {
+export function matrRotateZ(angleInDegree) {
   const a = d2r(angleInDegree);
   return mat4([
     [Math.cos(a), Math.sin(a), 0, 0],
@@ -395,4 +397,4 @@ matrRotateZ = (angleInDegree) => {
     [0, 0, 1, 0],
     [0, 0, 0, 1],
   ]);
-};
+}

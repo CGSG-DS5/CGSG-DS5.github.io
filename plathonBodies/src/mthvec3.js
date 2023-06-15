@@ -1,4 +1,4 @@
-class _vec3 {
+export class _vec3 {
   constructor(x, y, z) {
     if (x === undefined) this.x = this.y = this.z = 0;
     else if (typeof x === "object") {
@@ -98,6 +98,6 @@ class _vec3 {
   };
 }
 
-function vec3(...args) {
+export function vec3(...args) {
   return new _vec3(...args);
 }

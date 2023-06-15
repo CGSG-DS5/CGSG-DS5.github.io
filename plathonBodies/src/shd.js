@@ -6,7 +6,7 @@ class dsShader {
 }
 
 // Shader class constructor function
-function dsRndShader(gl) {
+export function dsRndShader(gl) {
   // Shader program load function
   this.load = (fileNamePrefix) => {
     const shds = [

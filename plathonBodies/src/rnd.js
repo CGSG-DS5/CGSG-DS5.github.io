@@ -1,4 +1,27 @@
-function countNormals(v, ind) {
+import {
+  mat4,
+  _mat4,
+  matrDeterm3x3,
+  matrIdentity,
+  matrRotateX,
+  matrRotateY,
+  matrRotateZ,
+  matrScale,
+  matrTranslate,
+} from "../src/mthmat4.js";
+import {
+  buffer,
+  index_buffer,
+  vertex_buffer,
+  uniform_buffer,
+} from "./buffer.js";
+import { vec2, _vec2 } from "./mthvec2.js";
+import { vec3, _vec3 } from "./mthvec3.js";
+import { dsRndShader } from "./shd.js";
+import { ds_cam, dsRnd, myTimer } from "./main.js";
+import { dsMtl, dsRndMtl } from "./mtl.js";
+
+export function countNormals(v, ind) {
   for (let i = 0; i < v.length; i++) v[i].n = vec3(0);
 
   if (ind !== null)
@@ -23,7 +46,7 @@ function countNormals(v, ind) {
     }
 }
 
-function countBB(v) {
+export function countBB(v) {
   let min = vec3(v[0].p),
     max = vec3(v[0].p);
 
@@ -41,7 +64,7 @@ function countBB(v) {
   return [min, max];
 }
 
-class _dsVert {
+export class _dsVert {
   constructor(p, t, n, c) {
     if (p === undefined) {
       this.p = vec3(0);
@@ -62,11 +85,11 @@ class _dsVert {
   }
 }
 
-function dsVert(...args) {
+export function dsVert(...args) {
   return new _dsVert(...args);
 }
 
-function vertArr2floatArr(vertices) {
+export function vertArr2floatArr(vertices) {
   let arr = [];
   for (let i = 0; i < vertices.length; i++) {
     arr.push(vertices[i].p.x);
@@ -85,13 +108,13 @@ function vertArr2floatArr(vertices) {
   return arr;
 }
 
-function mat2floatArr(arr, mat) {
+export function mat2floatArr(arr, mat) {
   for (let i = 0; i < 16; i++) arr.push(mat.a[(i - (i % 4)) / 4][i % 4]);
   return arr;
 }
 
 // Primitive class
-class dsPrim {
+export class dsPrim {
   constructor(type, v, ind) {
     this.vBuf = this.vA = this.iBuf = 0;
     if (v !== null) {
@@ -199,9 +222,10 @@ class dsPrim {
 }
 
 // Render class constructor function
-function dsRender() {
+export function dsRender() {
   // Render init
-  this.gl = document.getElementById("dsCan").getContext("webgl2");
+  this.can = document.getElementById("dsCan");
+  this.gl = this.can.getContext("webgl2");
 
   Object.defineProperty(window, "gl", {
     get: () => {
@@ -240,7 +264,10 @@ function dsRender() {
     return new Promise((resolve, reject) => {
       let v = [],
         ind = [],
-        nv;
+        nv,
+        c1,
+        c0,
+        c;
 
       fetch(fileName)
         .then((res) => res.text())
@@ -263,7 +290,7 @@ function dsRender() {
               let n = 0,
                 c0 = 0,
                 c1 = 0;
-              for (j = 1; j < buf.length; j++) {
+              for (let j = 1; j < buf.length; j++) {
                 c = parseInt(buf[j]);
                 if (c < 0) c += nv;
                 else c--;

@@ -1,25 +1,39 @@
-function makeV(v, ind) {
+import {
+  mat4,
+  _mat4,
+  matrDeterm3x3,
+  matrIdentity,
+  matrRotateX,
+  matrRotateY,
+  matrRotateZ,
+  matrScale,
+  matrTranslate,
+} from "../src/mthmat4.js";
+import { vec2, _vec2 } from "./mthvec2.js";
+import { vec3, _vec3 } from "./mthvec3.js";
+import { dsVert, _dsVert, dsPrim, countNormals } from "../src/rnd.js";
+export function makeV(v, ind) {
   let res = [];
   if (ind !== null)
-    for (i = 0; i < ind.length; i++) {
+    for (let i = 0; i < ind.length; i++) {
       res[i] = dsVert(v[ind[i]], vec2(0), vec3(0), vec3(0));
     }
   else
-    for (i = 0; i < v.length; i++) {
+    for (let i = 0; i < v.length; i++) {
       res[i] = dsVert(v[i], vec2(0), vec3(0), vec3(0));
     }
   return res;
 }
 
-function makeVecs(v, ind) {
+export function makeVecs(v, ind) {
   let res = [];
-  for (i = 0; i < ind.length; i++) {
+  for (let i = 0; i < ind.length; i++) {
     res[i] = vec3(v[ind[i]].x, v[ind[i]].y, v[ind[i]].z);
   }
   return res;
 }
 
-function createTetrahedron(matr) {
+export function createTetrahedron(matr) {
   let sq2 = Math.sqrt(2),
     sq6 = Math.sqrt(6);
   let vecs = [
@@ -40,7 +54,7 @@ function createTetrahedron(matr) {
   return pr;
 }
 
-function createHexahedron(matr) {
+export function createHexahedron(matr) {
   let l = 1 / Math.sqrt(3);
   let vecs = [
     vec3(-l, l, -l),
@@ -67,7 +81,7 @@ function createHexahedron(matr) {
   return pr;
 }
 
-function createOctahedron(matr) {
+export function createOctahedron(matr) {
   let vecs = [
     vec3(-1, 0, 0),
     vec3(0, 0, 1),
@@ -90,7 +104,7 @@ function createOctahedron(matr) {
   return pr;
 }
 
-function createDodecahedron(matr) {
+export function createDodecahedron(matr) {
   let vecs = [
     vec3(0, -1, 0),
     vec3(0, 1, 0),
@@ -200,7 +214,7 @@ function createDodecahedron(matr) {
   return pr;
 }
 
-function createIcosahedron(matr) {
+export function createIcosahedron(matr) {
   let vecs = [
     vec3(0, -1, 0),
     vec3(0, 1, 0),

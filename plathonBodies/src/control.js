@@ -1,25 +1,46 @@
+import { r2d, d2r } from "./mth.js";
+import {
+  mat4,
+  _mat4,
+  matrDeterm3x3,
+  matrIdentity,
+  matrRotateX,
+  matrRotateY,
+  matrRotateZ,
+  matrScale,
+  matrTranslate,
+} from "../src/mthmat4.js";
+import { myTimer, ds_cam } from "./main.js";
+import { vec3, _vec3 } from "./mthvec3.js";
+
 let isPressedLeft = false;
 let isPressedRight = false;
 
-function mouseChange(e, t) {
+export function mouseChange(e, t) {
   e.preventDefault();
   if (e.button === 0) isPressedLeft = t;
   else if (e.button === 2) isPressedRight = t;
 }
 
-function mouseOut() {
+export function mouseOut() {
   isPressedLeft = isPressedRight = false;
 }
 
-function pause(e) {
-  if (e.keyCode === 80) {
-    myTimer.isPause = !myTimer.isPause;
-    let tag = document.getElementById("pause");
-    tag.checked = myTimer.isPause;
+export function keyboard(e) {
+  switch (e.keyCode) {
+    case 80:
+      myTimer.isPause = !myTimer.isPause;
+      let tag = document.getElementById("pause");
+      tag.checked = myTimer.isPause;
+      break;
+    case 82:
+      ds_cam.camSet(vec3(5), vec3(2.5, 0, 0), vec3(0, 1, 0));
+      break;
   }
 }
 
-function camCtrl(e) {
+export function camCtrl(e) {
+  if (!e.ctrlKey) return;
   if (ds_cam === undefined) return;
 
   let dist = ds_cam.at.sub(ds_cam.loc).len();
@@ -77,7 +98,7 @@ function camCtrl(e) {
   e.preventDefault();
 }
 
-function resize() {
+export function resize() {
   let tagW = document.getElementById("windowW");
   let tagWT = document.getElementById("windowWText");
   window.gl.canvas.width = parseInt(tagW.value);
@@ -92,6 +113,6 @@ function resize() {
   window.gl.viewport(0, 0, window.gl.canvas.width, window.gl.canvas.height);
 }
 
-function setPause(tag) {
+export function setPause(tag) {
   myTimer.isPause = tag.checked;
 }

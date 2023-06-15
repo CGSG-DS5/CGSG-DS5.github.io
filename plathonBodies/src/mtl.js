@@ -1,4 +1,13 @@
-class dsMtl {
+import { ds_cam, dsRnd } from "./main.js";
+import {
+  buffer,
+  index_buffer,
+  vertex_buffer,
+  uniform_buffer,
+} from "./buffer.js";
+import { vec3, _vec3 } from "./mthvec3.js";
+
+export class dsMtl {
   constructor(name, ka, kd, ks, ph, trans, shdNo) {
     this.name = name;
     this.ka = ka;
@@ -34,7 +43,7 @@ class dsMtl {
   }
 }
 
-function dsRndMtl(gl) {
+export function dsRndMtl(gl) {
   this.getDef = () => {
     return new dsMtl("Default", vec3(0.1), vec3(0.9), vec3(0.3), 30.0, 1, 0);
   };

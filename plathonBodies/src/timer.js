@@ -1,5 +1,5 @@
 // Timer class constructor function
-function dsTimer() {
+export function dsTimer() {
   // Timer obtain current time in seconds method
   const getTime = () => {
     const date = new Date();

@@ -1,3 +1,52 @@
+import {
+  mat4,
+  _mat4,
+  matrDeterm3x3,
+  matrIdentity,
+  matrRotateX,
+  matrRotateY,
+  matrRotateZ,
+  matrScale,
+  matrTranslate,
+} from "../src/mthmat4.js";
+import { vec3, _vec3 } from "./mthvec3.js";
+import {
+  buffer,
+  index_buffer,
+  vertex_buffer,
+  uniform_buffer,
+} from "./buffer.js";
+
+export function matrView(loc, at, up1) {
+  const dir = at.sub(loc).norm();
+  const right = dir.cross(up1).norm();
+  const up = right.cross(dir);
+  return mat4([
+    [right.x, up.x, -dir.x, 0],
+    [right.y, up.y, -dir.y, 0],
+    [right.z, up.z, -dir.z, 0],
+    [-loc.dot(right), -loc.dot(up), loc.dot(dir), 1],
+  ]);
+}
+
+export function matrOrtho(l, r, b, t, n, f) {
+  return mat4([
+    [2 / (r - l), 0, 0, 0],
+    [0, 2 / (t - b), 0, 0],
+    [0, 0, 2 / (n - f), 0],
+    [(r + l) / (l - r), (t + b) / (b - t), (f + n) / (n - f), 1],
+  ]);
+}
+
+export function matrFrustum(l, r, b, t, n, f) {
+  return mat4([
+    [(2 * n) / (r - l), 0, 0, 0],
+    [0, (2 * n) / (t - b), 0, 0],
+    [(r + l) / (r - l), (t + b) / (t - b), (f + n) / (n - f), -1],
+    [0, 0, (2 * n * f) / (n - f), 0],
+  ]);
+}
+
 function createBuf(cam) {
   return [
     cam.loc.x,
@@ -22,7 +71,7 @@ function createBuf(cam) {
   ];
 }
 
-class dsCamera {
+export class dsCamera {
   constructor() {
     this.setDefault();
     const buf = createBuf(this);
@@ -95,7 +144,10 @@ class dsCamera {
       this.projDist,
       this.projFarClip
     );
+
     this.matrVP = this.matrView.mulMatr(this.matrProj);
+
+    if (this.ubo !== undefined) this.ubo.update(createBuf(this));
   };
 
   setSize = (frameW, frameH) => {
@@ -104,35 +156,3 @@ class dsCamera {
     this.setProj(this.projSize, this.projDist, this.projFarClip);
   };
 }
-
-function matrView(loc, at, up1) {
-  const dir = at.sub(loc).norm();
-  const right = dir.cross(up1).norm();
-  const up = right.cross(dir);
-  return mat4([
-    [right.x, up.x, -dir.x, 0],
-    [right.y, up.y, -dir.y, 0],
-    [right.z, up.z, -dir.z, 0],
-    [-loc.dot(right), -loc.dot(up), loc.dot(dir), 1],
-  ]);
-}
-
-function matrOrtho(l, r, b, t, n, f) {
-  return mat4([
-    [2 / (r - l), 0, 0, 0],
-    [0, 2 / (t - b), 0, 0],
-    [0, 0, 2 / (n - f), 0],
-    [(r + l) / (l - r), (t + b) / (b - t), (f + n) / (n - f), 1],
-  ]);
-}
-
-function matrFrustum(l, r, b, t, n, f) {
-  return mat4([
-    [(2 * n) / (r - l), 0, 0, 0],
-    [0, (2 * n) / (t - b), 0, 0],
-    [(r + l) / (r - l), (t + b) / (t - b), (f + n) / (n - f), -1],
-    [0, 0, (2 * n * f) / (n - f), 0],
-  ]);
-}
-
-let ds_cam = new dsCamera();

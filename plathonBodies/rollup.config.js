@@ -1,4 +1,7 @@
-const resolve = require("rollup-plugin-node-resolve");
+const babel = require("@rollup/plugin-babel");
+const resolve = require("@rollup/plugin-node-resolve");
+const commonjs = require("@rollup/plugin-commonjs");
+
 const uglify = require("rollup-plugin-uglify");
 
 module.exports = {
@@ -13,6 +16,10 @@ module.exports = {
       jsnext: true,
       main: true,
       browser: true,
+    }),
+    commonjs(),
+    babel({
+      exclude: ["node_modules/**", "bin/**"],
     }),
     uglify.uglify(),
   ],

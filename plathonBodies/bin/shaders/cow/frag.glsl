@@ -34,8 +34,9 @@ out vec4 OutColor;
 
 uniform float Time;
 
-in vec3 DrawNormal;
 in vec3 DrawPos;
+in vec2 DrawTexCoord;
+in vec3 DrawNormal;  
 
 vec3 gamma( vec3 V, float X )
 {

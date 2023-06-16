@@ -1,0 +1,33 @@
+import { dsUnit } from "../anim";
+import { dsRnd, myTimer } from "../main";
+import {
+  matrIdentity,
+  matrRotateX,
+  matrRotateZ,
+  matrScale,
+  matrTranslate,
+} from "../mthmat4";
+import { vec3 } from "../mthvec3";
+import { dsMtl } from "../mtl";
+import { primsLoad } from "../prims";
+
+export class u_tank extends dsUnit {
+  constructor(matr) {
+    super();
+    this.tank = null;
+    let prom = primsLoad("../bin/models/Sherman.g3dm");
+    prom.then((res) => {
+      this.tank = res;
+      this.tank.trans = matr;
+      const n = dsRnd.shd.add("tank");
+      for (let i = 0; i < this.tank.numOfPrims; i++)
+        dsRnd.mtl.get(this.tank.prims[i].mtlNo).shdNo = n;
+    });
+  }
+
+  render = () => {
+    if (this.tank !== null) {
+      this.tank.draw(matrIdentity());
+    }
+  };
+}

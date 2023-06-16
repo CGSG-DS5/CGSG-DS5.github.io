@@ -27,8 +27,8 @@ export function dsRndShader(gl) {
           gl.compileShader(shds[i][2]);
 
           if (!gl.getShaderParameter(shds[i][2], gl.COMPILE_STATUS)) {
-            const buf = gl.getShaderInfoLog(shds[i][2]);
-            console.log(buf);
+            const buf1 = gl.getShaderInfoLog(shds[i][2]);
+            console.log(buf + ":" + "\n" + buf1);
           }
         });
     }

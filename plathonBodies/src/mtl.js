@@ -36,6 +36,8 @@ export class dsMtl {
 
     this.uboBuf = new uniform_buffer("MtlUBO", buf.length * 4, 1);
     this.uboBuf.update(buf);
+
+    this.tex = [-1, -1, -1, -1, -1, -1, -1, -1];
   }
 
   free() {
@@ -70,6 +72,25 @@ export function dsRndMtl(gl) {
     window.gl.useProgram(prg);
 
     mtl.uboBuf.apply(prg);
+
+    let loc;
+
+    for (let i = 0; i < mtl.tex.length; i++) {
+      if (mtl.tex[i] !== -1) {
+        window.gl.activeTexture(window.gl.TEXTURE0 + i);
+        window.gl.bindTexture(
+          window.gl.TEXTURE_2D,
+          dsRnd.tex.textures[mtl.tex[i]].id
+        );
+        if ((loc = window.gl.getUniformLocation(prg, "Texture" + i)) !== -1)
+          window.gl.uniform1i(loc, i);
+        if ((loc = window.gl.getUniformLocation(prg, "IsTexture" + i)) !== -1)
+          window.gl.uniform1i(loc, 1);
+      } else {
+        if ((loc = window.gl.getUniformLocation(prg, "IsTexture" + i)) !== -1)
+          window.gl.uniform1i(loc, 0);
+      }
+    }
 
     return prg;
   };

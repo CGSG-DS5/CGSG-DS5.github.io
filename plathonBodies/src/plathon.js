@@ -11,16 +11,17 @@ import {
 } from "../src/mthmat4.js";
 import { vec2, _vec2 } from "./mthvec2.js";
 import { vec3, _vec3 } from "./mthvec3.js";
+import { vec4, _vec4 } from "./mthvec4.js";
 import { dsVert, _dsVert, dsPrim, countNormals } from "../src/rnd.js";
 export function makeV(v, ind) {
   let res = [];
   if (ind !== null)
     for (let i = 0; i < ind.length; i++) {
-      res[i] = dsVert(v[ind[i]], vec2(0), vec3(0), vec3(0));
+      res[i] = dsVert(v[ind[i]], vec2(0), vec3(0), vec4(0));
     }
   else
     for (let i = 0; i < v.length; i++) {
-      res[i] = dsVert(v[i], vec2(0), vec3(0), vec3(0));
+      res[i] = dsVert(v[i], vec2(0), vec3(0), vec4(0));
     }
   return res;
 }

@@ -33,9 +33,12 @@ precision highp float;
 out vec4 OutColor;
 
 uniform float Time;
+uniform sampler2D Texture0;
+uniform int IsTexture0;
 
-in vec3 DrawNormal;
 in vec3 DrawPos;
+in vec2 DrawTexCoord;
+in vec3 DrawNormal;                                         
 
 vec3 gamma( vec3 V, float X )
 {
@@ -50,9 +53,13 @@ void shade( void )
   vec3 LC = vec3(1.0);
   vec3 V = normalize(DrawPos - CamLoc);
   N = faceforward(N, V, N);
+  
+  vec3 diff = Kd;
+  if (IsTexture0 != 0)
+    diff *= texture(Texture0, DrawTexCoord).rgb;
   vec3 color =
     vec3(min(vec3(0.1), Ka) +
-         max(0.0, dot(N, L)) * Kd * LC +
+         max(0.0, dot(N, L)) * diff * LC +
          pow(max(0.0, dot(reflect(V, N), L)), Ph) * Ks * LC);
 
   OutColor = vec4(color, 1.0);

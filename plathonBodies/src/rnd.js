@@ -17,9 +17,13 @@ import {
 } from "./buffer.js";
 import { vec2, _vec2 } from "./mthvec2.js";
 import { vec3, _vec3 } from "./mthvec3.js";
+import { vec4, _vec4 } from "./mthvec4.js";
 import { dsRndShader } from "./shd.js";
 import { ds_cam, dsRnd, myTimer } from "./main.js";
 import { dsMtl, dsRndMtl } from "./mtl.js";
+import { dsRndTexture } from "./tex.js";
+
+export let dsRndShdAddnonI = [0, 0];
 
 export function countNormals(v, ind) {
   for (let i = 0; i < v.length; i++) v[i].n = vec3(0);
@@ -47,18 +51,31 @@ export function countNormals(v, ind) {
 }
 
 export function countBB(v) {
-  let min = vec3(v[0].p),
-    max = vec3(v[0].p);
+  let min, max;
+  if (typeof v[0] === "object") {
+    (min = vec3(v[0].p)), (max = vec3(v[0].p));
+    for (let i = 1; i < v.length; i++) {
+      if (v[i].p.x < min.x) min.x = v[i].p.x;
+      else if (v[i].p.x > max.x) max.x = v[i].p.x;
 
-  for (let i = 1; i < v.length; i++) {
-    if (v[i].p.x < min.x) min.x = v[i].p.x;
-    else if (v[i].p.x > max.x) max.x = v[i].p.x;
+      if (v[i].p.y < min.y) min.y = v[i].p.y;
+      else if (v[i].p.y > max.y) max.y = v[i].p.y;
 
-    if (v[i].p.y < min.y) min.y = v[i].p.y;
-    else if (v[i].p.y > max.y) max.y = v[i].p.y;
+      if (v[i].p.z < min.z) min.z = v[i].p.z;
+      else if (v[i].p.z > max.z) max.z = v[i].p.z;
+    }
+  } else {
+    (min = vec3(v[0], v[1], v[2])), (max = vec3(v[0], v[1], v[2]));
+    for (let i = 3; i + 2 < v.length; i += 3 + 2 + 3 + 4) {
+      if (v[i] < min.x) min.x = v[i];
+      else if (v[i] > max.x) max.x = v[i];
 
-    if (v[i].p.z < min.z) min.z = v[i].p.z;
-    else if (v[i].p.z > max.z) max.z = v[i].p.z;
+      if (v[i + 1] < min.y) min.y = v[i + 1];
+      else if (v[i + 1] > max.y) max.y = v[i + 1];
+
+      if (v[i + 2] < min.z) min.z = v[i + 2];
+      else if (v[i + 2] > max.z) max.z = v[i + 2];
+    }
   }
 
   return [min, max];
@@ -70,7 +87,7 @@ export class _dsVert {
       this.p = vec3(0);
       this.t = vec2(0);
       this.n = vec3(0);
-      this.c = vec3(0);
+      this.c = vec4(0);
     } else if (typeof p === "object" && t === undefined) {
       this.p = p.p;
       this.t = p.t;
@@ -90,6 +107,7 @@ export function dsVert(...args) {
 }
 
 export function vertArr2floatArr(vertices) {
+  if (typeof vertices[0] !== "object") return vertices;
   let arr = [];
   for (let i = 0; i < vertices.length; i++) {
     arr.push(vertices[i].p.x);
@@ -98,12 +116,15 @@ export function vertArr2floatArr(vertices) {
 
     arr.push(vertices[i].t.x);
     arr.push(vertices[i].t.y);
+
     arr.push(vertices[i].n.x);
     arr.push(vertices[i].n.y);
     arr.push(vertices[i].n.z);
+
     arr.push(vertices[i].c.x);
     arr.push(vertices[i].c.y);
     arr.push(vertices[i].c.z);
+    arr.push(vertices[i].c.w);
   }
   return arr;
 }
@@ -180,29 +201,11 @@ export class dsPrim {
     if ((loc = window.gl.getUniformLocation(prg, "Time")) !== -1) {
       window.gl.uniform1f(loc, myTimer.localTime);
     }
-
-    if ((loc = window.gl.getAttribLocation(prg, "InPos")) !== -1) {
-      window.gl.vertexAttribPointer(
-        loc,
-        3,
-        window.gl.FLOAT,
-        false,
-        (3 + 2 + 3 + 3) * 4,
-        0
-      );
-      window.gl.enableVertexAttribArray(loc);
+    if ((loc = window.gl.getUniformLocation(prg, "AddonI0")) !== -1) {
+      window.gl.uniform1i(loc, dsRndShdAddnonI[0]);
     }
-
-    if ((loc = window.gl.getAttribLocation(prg, "InNormal")) !== -1) {
-      window.gl.vertexAttribPointer(
-        loc,
-        3,
-        window.gl.FLOAT,
-        false,
-        (3 + 2 + 3 + 3) * 4,
-        (3 + 2) * 4
-      );
-      window.gl.enableVertexAttribArray(loc);
+    if ((loc = window.gl.getUniformLocation(prg, "AddonI1")) !== -1) {
+      window.gl.uniform1i(loc, dsRndShdAddnonI[1]);
     }
 
     window.gl.bindVertexArray(this.vA);
@@ -217,6 +220,54 @@ export class dsPrim {
         window.gl.UNSIGNED_INT,
         0
       );
+    }
+
+    if ((loc = window.gl.getAttribLocation(prg, "InPos")) !== -1) {
+      window.gl.vertexAttribPointer(
+        loc,
+        3,
+        window.gl.FLOAT,
+        false,
+        (3 + 2 + 3 + 4) * 4,
+        0
+      );
+      window.gl.enableVertexAttribArray(loc);
+    }
+
+    if ((loc = window.gl.getAttribLocation(prg, "InTexCoord")) !== -1) {
+      window.gl.vertexAttribPointer(
+        loc,
+        2,
+        window.gl.FLOAT,
+        false,
+        (3 + 2 + 3 + 4) * 4,
+        3 * 4
+      );
+      window.gl.enableVertexAttribArray(loc);
+    }
+
+    if ((loc = window.gl.getAttribLocation(prg, "InNormal")) !== -1) {
+      window.gl.vertexAttribPointer(
+        loc,
+        3,
+        window.gl.FLOAT,
+        false,
+        (3 + 2 + 3 + 4) * 4,
+        (3 + 2) * 4
+      );
+      window.gl.enableVertexAttribArray(loc);
+    }
+
+    if ((loc = window.gl.getAttribLocation(prg, "InColor")) !== -1) {
+      window.gl.vertexAttribPointer(
+        loc,
+        4,
+        window.gl.FLOAT,
+        false,
+        (3 + 2 + 3 + 4) * 4,
+        (3 + 2 + 3) * 4
+      );
+      window.gl.enableVertexAttribArray(loc);
     }
   };
 }
@@ -242,6 +293,7 @@ export function dsRender() {
 
   this.shd = new dsRndShader(this.gl);
   this.mtl = new dsRndMtl(this.gl);
+  this.tex = new dsRndTexture();
 
   this.matrixUBO = new uniform_buffer("MatrixUBO", 16 * 3 * 4, 0);
 

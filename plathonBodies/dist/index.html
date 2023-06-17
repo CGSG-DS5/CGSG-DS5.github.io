@@ -28,6 +28,9 @@
       <span id="windowWText">1080</span>
       <input id="windowH" type="range" min="100" max="1080" step="10" />
       <span id="windowHText">1080</span>
+      <p>
+        Press 0 to enter tank mode. Press ESC twice to enter free camera mode.
+      </p>
     </div>
     <canvas
       id="dsCan"
@@ -36,9 +39,9 @@
       onmousedown="mouseChangeCan(event, true)"
       onmouseup="mouseChangeCan(event, false)"
       onmouseout="mouseOutCan()"
-      onmousewheel="camCtrlCan(event)"
-      onmousemove="camCtrlCan(event)"
     ></canvas>
+    <!-- onmousemove="camCtrlCan(event)" -->
+    <!-- onmousewheel="camCtrlCan(event)" -->
     <script type="module" src="./main.js"></script>
   </body>
 </html>

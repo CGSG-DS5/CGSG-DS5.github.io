@@ -52,22 +52,27 @@ function createBuf(cam) {
     cam.loc.x,
     cam.loc.y,
     cam.loc.z,
-    0,
+    cam.dir.x,
 
     cam.up.x,
     cam.up.y,
     cam.up.z,
-    0,
+    cam.dir.y,
 
     cam.right.x,
     cam.right.y,
     cam.right.z,
-    0,
+    cam.dir.z,
 
     cam.at.x,
     cam.at.y,
     cam.at.z,
     0,
+
+    cam.frameW,
+    cam.frameH,
+    cam.projDist,
+    cam.projSize,
   ];
 }
 

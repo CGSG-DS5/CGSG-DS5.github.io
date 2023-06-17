@@ -77,15 +77,27 @@ export function dsRndMtl(gl) {
 
     for (let i = 0; i < mtl.tex.length; i++) {
       if (mtl.tex[i] !== -1) {
-        window.gl.activeTexture(window.gl.TEXTURE0 + i);
-        window.gl.bindTexture(
-          window.gl.TEXTURE_2D,
-          dsRnd.tex.textures[mtl.tex[i]].id
-        );
-        if ((loc = window.gl.getUniformLocation(prg, "Texture" + i)) !== -1)
-          window.gl.uniform1i(loc, i);
-        if ((loc = window.gl.getUniformLocation(prg, "IsTexture" + i)) !== -1)
-          window.gl.uniform1i(loc, 1);
+        if (!dsRnd.tex.textures[mtl.tex[i]].isCube) {
+          window.gl.activeTexture(window.gl.TEXTURE0 + i);
+          window.gl.bindTexture(
+            window.gl.TEXTURE_2D,
+            dsRnd.tex.textures[mtl.tex[i]].id
+          );
+          if ((loc = window.gl.getUniformLocation(prg, "Texture" + i)) !== -1)
+            window.gl.uniform1i(loc, i);
+          if ((loc = window.gl.getUniformLocation(prg, "IsTexture" + i)) !== -1)
+            window.gl.uniform1i(loc, 1);
+        } else {
+          window.gl.activeTexture(window.gl.TEXTURE0 + 9);
+          window.gl.bindTexture(
+            window.gl.TEXTURE_CUBE_MAP,
+            dsRnd.tex.textures[mtl.tex[i]].id
+          );
+          if ((loc = window.gl.getUniformLocation(prg, "Cubemap" + i)) !== -1)
+            window.gl.uniform1i(loc, i);
+          if ((loc = window.gl.getUniformLocation(prg, "IsTexture" + i)) !== -1)
+            window.gl.uniform1i(loc, 1);
+        }
       } else {
         if ((loc = window.gl.getUniformLocation(prg, "IsTexture" + i)) !== -1)
           window.gl.uniform1i(loc, 0);

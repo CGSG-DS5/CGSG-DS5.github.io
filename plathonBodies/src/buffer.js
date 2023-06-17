@@ -96,7 +96,7 @@ export class uniform_buffer extends buffer {
 
   apply(prg) {
     let blk_loc = window.gl.getUniformBlockIndex(prg, this.name);
-    if (blk_loc !== -1) {
+    if (blk_loc !== -1 && blk_loc !== 4294967295) {
       window.gl.uniformBlockBinding(prg, blk_loc, this.bind);
       window.gl.bindBufferBase(window.gl.UNIFORM_BUFFER, this.bind, this.id);
     }

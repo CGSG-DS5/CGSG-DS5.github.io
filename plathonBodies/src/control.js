@@ -13,8 +13,27 @@ import {
 import { myTimer, ds_cam } from "./main.js";
 import { vec3, _vec3 } from "./mthvec3.js";
 
-let isPressedLeft = false;
-let isPressedRight = false;
+export let isPressedLeftAll = false;
+
+export let isPressedLeft = false;
+export let isPressedRight = false;
+export let isTankCam = false;
+
+export let keysOld = [];
+export let keys = [];
+export let keysClick = [];
+
+keys.length = keysOld.length = keysClick.length = 256;
+for (let i = 0; i < 256; i++) {
+  keys[i] = keysClick[i] = keysOld[i] = 0;
+}
+
+export function ctrlDownLB(e) {
+  if (e.button === 0) isPressedLeftAll = true;
+}
+export function ctrlUpRB(e) {
+  if (e.button === 0) isPressedLeftAll = false;
+}
 
 export function mouseChange(e, t) {
   e.preventDefault();
@@ -36,11 +55,39 @@ export function keyboard(e) {
     case 82:
       ds_cam.camSet(vec3(5), vec3(2.5, 0, 0), vec3(0, 1, 0));
       break;
+    case 48:
+      isTankCam = true;
+      break;
+    case 27:
+      isTankCam = false;
+      break;
   }
 }
 
+export function ctrlKeyDown(e) {
+  keysOld[e.keyCode] = keys[e.keyCode];
+  keys[e.keyCode] = 1;
+  keysClick[e.keyCode] = !keysOld[e.keyCode];
+}
+
+export function ctrlKeyUp(e) {
+  keysOld[e.keyCode] = keys[e.keyCode];
+  keys[e.keyCode] = 0;
+  keysClick[e.keyCode] = 0;
+}
+
+export function updateCtrl() {
+  if (keysClick[80]) {
+    myTimer.isPause = !myTimer.isPause;
+    let tag = document.getElementById("pause");
+    tag.checked = myTimer.isPause;
+  }
+  if (keysClick[82]) ds_cam.camSet(vec3(5), vec3(2.5, 0, 0), vec3(0, 1, 0));
+  if (keysClick[48]) isTankCam = true;
+  if (keysClick[27]) isTankCam = false;
+}
+
 export function camCtrl(e) {
-  if (!e.ctrlKey) return;
   if (ds_cam === undefined) return;
 
   let dist = ds_cam.at.sub(ds_cam.loc).len();

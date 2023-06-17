@@ -110,7 +110,8 @@ export async function primsLoad(fileName) {
       s[10],
       0
     );
-    mtl.tex = txtarr;
+    for (let i = 0; i < 8; i++)
+      mtl.tex[i] = txtarr[i] == -1 ? -1 : txtarr[i] + dsRnd.tex.texSize;
     dsRnd.mtl.add(mtl);
 
     ptr += 300 + 4;

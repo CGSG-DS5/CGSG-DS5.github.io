@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>DS5 :: Fractal</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <form name="form name" action="https://cgsg.pml30.ru" method="get">
+      <input
+        id="cgsg"
+        type="image"
+        src="https://cgsg.pml30.ru/!inc/CGSG-Logo.svg"
+        height="200px"
+      />
+    </form>
+    <script type="text/javascript" src="utils.js"></script>
+    <div>
+      <input id="pause" type="checkbox" onclick="setPause(this)" />Pause
+      <input id="reset" type="button" value="Reset" onclick="setReset(this)" />
+      <input
+        id="rad"
+        type="radio"
+        name="Type"
+        value="Julia"
+        onclick="changeType(0)"
+        checked
+      />
+      <input
+        id="rad"
+        type="radio"
+        name="Type"
+        value="Mandelbrot"
+        onclick="changeType(1)"
+      />
+      <input id="windowSize" type="range" min="10" max="1080" step="10" />
+      <span id="windowSizeText">1080</span>
+      <input id="frcType" type="button" value="Julia" onclick="setType(this)" />
+      <span id="fps">FPS: 47.00</span>
+    </div>
+    <canvas
+      id="ds5Can"
+      width="1080px"
+      height="1080px"
+      style="border: 5px Solid #7fff7f"
+      onmousedown="setPress(true)"
+      onmouseup="setPress(false)"
+      onmouseleave="setPress(false)"
+      onmousewheel="zoomWheel(event)"
+    ></canvas>
+    <script type="text/javascript" src="main.js"></script>
+    <script type="text/javascript">
+      window.addEventListener("load", () => {
+        initGL();
+      });
+      // window.addEventListener("mousedown", () => {
+      //     isPressed = true;
+      // });
+      // window.addEventListener("mouseup", () => {
+      //     isPressed = false;
+      // });
+      window.addEventListener("mousemove", (e) => {
+        if (isPressed) {
+          let t = (e.movementX * (x1 - x0)) / gl.canvas.width;
+          x0 -= t;
+          x1 -= t;
+          t = (e.movementY * (y1 - y0)) / gl.canvas.height;
+          y0 += t;
+          y1 += t;
+        }
+      });
+      // window.addEventListener("wheel", (e) => {
+      //   if (
+      //     e.x >= gl.canvas.offsetLeft &&
+      //     e.y >= gl.canvas.offsetTop &&
+      //     e.x <= gl.canvas.offsetLeft + gl.canvas.width &&
+      //     e.y <= gl.canvas.offsetTop + gl.canvas.height
+      //   ) {
+      //     e.preventDefault();
+      //     let x =
+      //         ((x1 - x0) * (e.x - gl.canvas.offsetLeft)) / gl.canvas.width + x0,
+      //       y =
+      //         ((y0 - y1) * (e.y - gl.canvas.offsetTop)) / gl.canvas.height + y1;
+
+      //     x0 -= (e.deltaY * (x1 - x0)) / 1000;
+      //     y0 -= (e.deltaY * (y1 - y0)) / 1000;
+      //     x1 += (e.deltaY * (x1 - x0)) / 1000;
+      //     y1 += (e.deltaY * (y1 - y0)) / 1000;
+
+      //     xn =
+      //       ((x1 - x0) * (e.x - gl.canvas.offsetLeft)) / gl.canvas.width + x0;
+      //     yn =
+      //       ((y0 - y1) * (e.y - gl.canvas.offsetTop)) / gl.canvas.height + y1;
+
+      //     x0 += x - xn;
+      //     x1 += x - xn;
+      //     y0 += y - yn;
+      //     y1 += y - yn;
+      //   }
+      // });
+      window.addEventListener("keydown", (e) => {
+        if (e.keyCode == 80) {
+          isPause = !isPause;
+          let tag = document.getElementById("pause");
+          tag.checked = isPause;
+        }
+      });
+    </script>
+  </body>
+</html>

@@ -1,3 +1,0 @@
-0 --- MatrixUBO
-1 --- MtlUBO
-2 --- CamUBO

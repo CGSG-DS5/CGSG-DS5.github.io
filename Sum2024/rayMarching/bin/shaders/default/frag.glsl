@@ -256,8 +256,8 @@ void main( void )
     RayOrg = CamLoc + RayDir;
   RayDir = normalize(RayDir);
 
-  // OutColor = vec4(RayMarch(RayOrg, RayDir), 1);
-  OutColor = vec4(texture(Tex, -RayDir).xyz, 1);
+  OutColor = vec4(RayMarch(RayOrg, RayDir), 1);
+  // OutColor = vec4(texture(Tex, -RayDir).xyz, 1);
   // OutColor = vec4(texture(Tex1, gl_FragCoord.xy / vec2(FrameW, FrameH)).xyz, 1);
   // OutColor = vec4(texture(Tex1, vec2(atan(RayDir.x, RayDir.z) / (2.0 * acos(-1.0)), acos(-RayDir.y) / acos(-1.0))).xyz, 1);
 }

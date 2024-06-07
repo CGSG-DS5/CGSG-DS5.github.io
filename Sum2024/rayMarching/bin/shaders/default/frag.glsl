@@ -237,7 +237,7 @@ vec3 RayMarch( const vec3 Org, const vec3 Dir )
              pow(max(0.0, dot(reflect(V, N), L)), DistNearest.Mtl.KsPh.w) * DistNearest.Mtl.KsPh.xyz * LC)) * shadow;
     }
 
-    TotalDist += DistNearest.Dist;
+    TotalDist += abs(DistNearest.Dist);
     CurPos = TotalDist * Dir + Org;
   }
 

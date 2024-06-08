@@ -13,6 +13,12 @@ export class shape {
     this.type = type;
   }
 
+  push2List(mas: shape[], maxLen: number) {
+    if (maxLen <= mas.length) return false;
+    mas.push(this);
+    return true;
+  }
+
   write2Array(mas: number[]) {
     let invTrans = this.trans.inverse();
     for (let i = 0; i < 4; i++)
@@ -65,6 +71,134 @@ export class plane extends shape {
   write2Array(mas: number[]) {
     super.write2Array(mas);
     mas.push(this.normal.x, this.normal.y, this.normal.z, this.offset);
+    mas.push(0, 0, 0, 0);
+  }
+}
+
+export class union extends shape {
+  shpA: shape;
+  shpB: shape;
+
+  constructor(trans: _matr, mtl: material, shpA: shape, shpB: shape) {
+    super(trans, mtl, 3);
+    this.shpA = shpA;
+    this.shpB = shpB;
+  }
+
+  push2List(mas: shape[], maxLen: number) {
+    if (!super.push2List(mas, maxLen)) return false;
+    if (!this.shpA.push2List(mas, maxLen)) {
+      mas.length--;
+      return false;
+    }
+    if (!this.shpB.push2List(mas, maxLen)) {
+      mas.length -= 2;
+      return false;
+    }
+    return true;
+  }
+
+  write2Array(mas: number[]) {
+    super.write2Array(mas);
+    mas.push(0, 0, 0, 0);
+    mas.push(0, 0, 0, 0);
+  }
+}
+
+export class subtract extends shape {
+  shpA: shape;
+  shpB: shape;
+
+  constructor(trans: _matr, mtl: material, shpA: shape, shpB: shape) {
+    super(trans, mtl, 4);
+    this.shpA = shpA;
+    this.shpB = shpB;
+  }
+
+  push2List(mas: shape[], maxLen: number) {
+    if (!super.push2List(mas, maxLen)) return false;
+    if (!this.shpA.push2List(mas, maxLen)) {
+      mas.length--;
+      return false;
+    }
+    if (!this.shpB.push2List(mas, maxLen)) {
+      mas.length -= 2;
+      return false;
+    }
+    return true;
+  }
+
+  write2Array(mas: number[]) {
+    super.write2Array(mas);
+    mas.push(0, 0, 0, 0);
+    mas.push(0, 0, 0, 0);
+  }
+}
+
+export class intersect extends shape {
+  shpA: shape;
+  shpB: shape;
+
+  constructor(trans: _matr, mtl: material, shpA: shape, shpB: shape) {
+    super(trans, mtl, 5);
+    this.shpA = shpA;
+    this.shpB = shpB;
+  }
+
+  push2List(mas: shape[], maxLen: number) {
+    if (!super.push2List(mas, maxLen)) return false;
+    if (!this.shpA.push2List(mas, maxLen)) {
+      mas.length--;
+      return false;
+    }
+    if (!this.shpB.push2List(mas, maxLen)) {
+      mas.length -= 2;
+      return false;
+    }
+    return true;
+  }
+
+  write2Array(mas: number[]) {
+    super.write2Array(mas);
+    mas.push(0, 0, 0, 0);
+    mas.push(0, 0, 0, 0);
+  }
+}
+
+export class blend extends shape {
+  shpA: shape;
+  shpB: shape;
+  ks: number;
+
+  constructor(
+    trans: _matr,
+    mtl: material,
+    shpA: shape,
+    shpB: shape,
+    ks: number
+  ) {
+    super(trans, mtl, 6);
+    this.shpA = shpA;
+    this.shpB = shpB;
+    this.ks = ks;
+  }
+
+  push2List(mas: shape[], maxLen: number) {
+    if (!super.push2List(mas, maxLen)) return false;
+    if (!this.shpA.push2List(mas, maxLen)) {
+      mas.length--;
+      return false;
+    }
+    if (!this.shpB.push2List(mas, maxLen)) {
+      mas.length -= 2;
+      return false;
+    }
+    return true;
+  }
+
+  write2Array(mas: number[]) {
+    super.write2Array(mas);
+    mas.push(this.ks, 0, 0, 0);
     mas.push(0, 0, 0, 0);
   }
 }

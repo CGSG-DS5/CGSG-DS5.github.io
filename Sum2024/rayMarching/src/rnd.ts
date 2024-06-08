@@ -152,7 +152,6 @@ export class rndContext {
   };
 
   drawShape = (shp: shape) => {
-    if (this.drawingShapes.length >= this.maxShapes) return;
-    this.drawingShapes.push(shp);
+    shp.push2List(this.drawingShapes, this.maxShapes);
   };
 }

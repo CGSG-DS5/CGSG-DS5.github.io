@@ -11,7 +11,7 @@ import {
   r2d
 } from '../mthmatr';
 import { vec3 } from '../mthvec3';
-import { box, plane, shape, sphere } from '../shape';
+import { blend, box, plane, shape, sphere, union } from '../shape';
 
 export class test_unit extends unit {
   shpSphere: shape = new sphere(
@@ -48,13 +48,49 @@ export class test_unit extends unit {
     ),
     vec3(1, 1, 1)
   );
+  shpBlend: blend = new blend(
+    matrIdentity(),
+    new material(
+      vec3(0.1, 0.1, 0.1),
+      vec3(0.3, 0.9, 0.5),
+      vec3(0.5, 0.5, 0.5),
+      28,
+      -1
+    ),
+    this.shpPlane,
+    this.shpBox,
+    0.5
+  );
+  shpBlend1: blend = new blend(
+    matrIdentity(),
+    new material(
+      vec3(0.1, 0.1, 0.1),
+      vec3(0.3, 0.9, 0.5),
+      vec3(0.5, 0.5, 0.5),
+      28,
+      -1
+    ),
+    this.shpBlend,
+    this.shpSphere,
+    0.5
+  );
 
   render = (ani: animContext) => {
-    this.shpSphere.trans = matrTranslate(vec3(0, 2, 3)).mulMatr(
+    // ani.drawShape(this.shpPlane);
+    // this.shpSphere.trans = matrTranslate(vec3(0, 2, 3)).mulMatr(
+    //   matrRotateY(ani.localTime * 100)
+    // );
+    // ani.drawShape(this.shpSphere);
+    // ani.drawShape(this.shpBox);
+    this.shpBlend1.ks = Math.abs(Math.sin(ani.localTime));
+    (this.shpBlend1.shpA as blend).ks = Math.abs(Math.sin(ani.localTime));
+    this.shpBlend1.shpB.trans = matrTranslate(vec3(0, 2, 2)).mulMatr(
       matrRotateY(ani.localTime * 100)
     );
-    ani.drawShape(this.shpSphere);
-    ani.drawShape(this.shpPlane);
-    ani.drawShape(this.shpBox);
+    ani.drawShape(this.shpBlend1);
+    // this.shpBlend.shpA.trans = matrTranslate(vec3(0, 2, 2)).mulMatr(
+    // matrRotateY(ani.localTime * 100)
+    // );
+    // ani.drawShape(this.shpBlend);
   };
 }

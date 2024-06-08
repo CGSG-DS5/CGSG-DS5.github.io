@@ -7,10 +7,13 @@ import { control_unit } from './units/control_unit';
 import { redactor_unit } from './units/redactor_unit';
 import { test_unit } from './units/test_unit';
 
+let canvas: HTMLCanvasElement;
+
 function getContext() {
-  const canvas = document.querySelector('#glcan') as HTMLCanvasElement | null;
-  if (!canvas) return;
-  const ctx = canvas.getContext('webgl2');
+  const canvas1 = document.querySelector('#glcan') as HTMLCanvasElement | null;
+  if (!canvas1) return;
+  canvas = canvas1;
+  const ctx = canvas1.getContext('webgl2');
   if (!ctx) return;
   gl = ctx;
 
@@ -31,8 +34,10 @@ window.addEventListener('load', () => {
   let w: number = window.innerWidth;
   let h: number = window.innerHeight;
   anim.resize(w, h);
-  gl.canvas.width = w;
-  gl.canvas.height = h;
+  gl.canvas.width = anim.rnd.cam.frameW;
+  gl.canvas.height = anim.rnd.cam.frameH;
+  canvas.style.width = w + 'px';
+  canvas.style.height = h + 'px';
   can2d.canvas.width = w;
   can2d.canvas.height = h;
 
@@ -61,8 +66,10 @@ window.addEventListener('resize', (event: UIEvent) => {
   let w: number = window.innerWidth;
   let h: number = window.innerHeight;
   anim.resize(w, h);
-  gl.canvas.width = w;
-  gl.canvas.height = h;
+  gl.canvas.width = anim.rnd.cam.frameW;
+  gl.canvas.height = anim.rnd.cam.frameH;
+  canvas.style.width = w + 'px';
+  canvas.style.height = h + 'px';
   can2d.canvas.width = w;
   can2d.canvas.height = h;
 });

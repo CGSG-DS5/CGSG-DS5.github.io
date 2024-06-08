@@ -5,7 +5,7 @@ export class material {
   kd: _vec3;
   ks: _vec3;
   ph: number;
-  texN: number = 0;
+  texN: number = -1;
 
   constructor(ka: _vec3, kd: _vec3, ks: _vec3, ph: number, texN: number) {
     this.ka = ka;

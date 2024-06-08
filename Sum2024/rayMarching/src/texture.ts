@@ -21,13 +21,13 @@ export class textureManager {
       if (!this.textures[i].isCube) {
         gl.activeTexture(gl.TEXTURE1);
         gl.bindTexture(gl.TEXTURE_2D, this.textures[i].texId);
-        if ((loc = gl.getUniformLocation(prg, 'Tex' + 1)) != -1)
-          gl.uniform1i(loc, 1);
+        if ((loc = gl.getUniformLocation(prg, 'Texs[' + i + ']')) != -1)
+          gl.uniform1i(loc, i);
       } else {
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_CUBE_MAP, this.textures[i].texId);
         if ((loc = gl.getUniformLocation(prg, 'Tex')) != -1)
-          gl.uniform1i(loc, 0);
+          gl.uniform1i(loc, i);
       }
   };
 
@@ -68,6 +68,8 @@ export class textureManager {
     this.textures[n] = new texture(name, res, true);
     gl.bindTexture(gl.TEXTURE_CUBE_MAP, this.textures[n].texId);
 
+    let a = [false, false, false, false, false, false];
+
     for (let i = 0; i < 6; i++) {
       const img = new Image();
       img.src = '../bin/textures/skyboxes/' + name + '/' + names[i] + '.' + ext;
@@ -81,6 +83,9 @@ export class textureManager {
           gl.UNSIGNED_BYTE,
           img
         );
+        a[i] = true;
+        if (a[0] && a[1] && a[2] && a[3] && a[4] && a[5])
+          gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
       };
     }
 
@@ -89,10 +94,9 @@ export class textureManager {
       gl.TEXTURE_MIN_FILTER,
       gl.LINEAR_MIPMAP_LINEAR
     );
-    // gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-    // gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-    // gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    // gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_R, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 
     return n;
   };

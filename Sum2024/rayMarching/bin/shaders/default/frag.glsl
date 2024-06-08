@@ -38,9 +38,13 @@ uniform Utils // 1
 
 out vec4 OutColor;
 
-#define SHAPE_TYPE_SPHERE 0.0
-#define SHAPE_TYPE_BOX 1.0
-#define SHAPE_TYPE_PLANE 2.0
+#define SHAPE_TYPE_SPHERE 0
+#define SHAPE_TYPE_BOX 1
+#define SHAPE_TYPE_PLANE 2
+#define SHAPE_TYPE_UNION 3
+#define SHAPE_TYPE_SUBTRACT 4
+#define SHAPE_TYPE_INTERSECT 5
+#define SHAPE_TYPE_BLEND 6
 
 struct material
 {
@@ -65,44 +69,10 @@ uniform Scene // 2
 };
 #define NumOfShapes int(NumOfShapes4.x)
 
-
-/*shape Shapes[2] = shape[2]
-  (
-    shape
-    (
-      mat4
-        (
-          1, 0, 0, 0,
-          0, 1, 0, 0,
-          0, 0, 1, 0,
-          0, 1, 0, 1
-        ),
-      material(vec4(vec3(0.1), 0), vec4(0.8, 0.3, 0.1, 0), vec4(vec3(1), 40), vec4(-1)),
-      vec4(SHAPE_TYPE_SPHERE, 0, 0, 0),
-      vec4(0.5, 0, 0, 0),
-      vec4(0, 0, 0, 0)
-    ),
-    shape
-    (
-      mat4
-        (
-          1, 0, 0, 0,
-          0, 1, 0, 0,
-          0, 0, 1, 0,
-          0, 0, 0, 1
-        ),
-      material(vec4(vec3(0.1), 0), vec4(vec3(0.1), 0), vec4(vec3(1), 40), vec4(-1)),
-      vec4(SHAPE_TYPE_PLANE, 0, 0, 0),
-      vec4(0, 1, 0, 0),
-      vec4(0, 0, 0, 0)
-    )
-  ); 
-#define NumOfShapes 2*/
-
 struct dist_info
 {
   float Dist;
-  material Mtl;
+  int Indx;
 };
 
 float GetShapeDistanceSphere( const vec3 P, const shape S )
@@ -117,51 +87,89 @@ float GetShapeDistanceBox( const vec3 P, const shape S )
 
 float GetShapeDistancePlane( const vec3 P, const shape S )
 {
-  return abs(dot(P, S.V1.xyz) + S.V1.w);
+  return abs(dot(P, S.V1.xyz) - S.V1.w);
 }
 
-float GetShapeDistance( const vec3 P, const shape S )
+float GetShapeDistanceUnion( const vec3 P, const float A, const float B )
 {
-  vec3 PTrans = (S.InvTrans * vec4(P, 1)).xyz;
-  return
-    mix(
-      mix(
-        GetShapeDistancePlane(PTrans, S),
-        GetShapeDistanceBox(PTrans, S),
-        float(S.Type.x == SHAPE_TYPE_BOX)
-      ),
-      GetShapeDistanceSphere(PTrans, S),
-      float(S.Type.x == SHAPE_TYPE_SPHERE)
-    );
+  return min(A, B);
 }
 
-material mix( const material A, const material B, const float T )
+float GetShapeDistanceSubtract( const vec3 P, const float A, const float B )
 {
-  return material
-    (
-      mix(A.Ka, B.Ka, T),
-      mix(A.KdTrans, B.KdTrans, T),
-      mix(A.KsPh, B.KsPh, T),
-      mix(A.TexN, B.TexN, T)
-    );
+  return max(-A, B);
 }
 
-dist_info mix( const dist_info A, const dist_info B, const float T )
+float GetShapeDistanceIntersect( const vec3 P, const float A, const float B )
 {
-  return dist_info
-    (
-      mix(A.Dist, B.Dist, T),
-      mix(A.Mtl, B.Mtl, T)
-    );
+  return max(A, B);
 }
+
+
+float smin( float a, float b, float k )
+{
+  float h = clamp(0.5 + 0.5 * (a - b) / k, 0.0, 1.0);
+  return mix(a, b, h) - k * h * (1.0 - h);
+}
+
+float GetShapeDistanceBlend( const vec3 P, const float A, const float B, const float k )
+{
+  return smin(A, B, k);
+}
+
+#define GSD(Name, Name0)                                                                               \
+dist_info Name( const vec3 P, const int I, const int C )                                               \
+{                                                                                                      \
+  vec3 PTrans = (Shapes[I].InvTrans * vec4(P, 1)).xyz;                                                 \
+  dist_info A, B;                                                                                      \
+  switch (int(Shapes[I].Type.x))                                                                       \
+  {                                                                                                    \
+    case SHAPE_TYPE_PLANE:                                                                             \
+      return dist_info(GetShapeDistancePlane(PTrans, Shapes[I]), C + 1);                               \
+    case SHAPE_TYPE_BOX:                                                                               \
+      return dist_info(GetShapeDistanceBox(PTrans, Shapes[I]), C + 1);                                 \
+    case SHAPE_TYPE_SPHERE:                                                                            \
+      return dist_info(GetShapeDistanceSphere(PTrans, Shapes[I]), C + 1);                              \
+    default:                                                                                           \
+      A = Name0(PTrans, I + 1, 0);                                                                     \
+      B = Name0(PTrans, I + 1 + A.Indx, 0);                                                            \
+  }                                                                                                    \
+                                                                                                       \
+  switch (int(Shapes[I].Type.x))                                                                       \
+  {                                                                                                    \
+    case SHAPE_TYPE_UNION:                                                                             \
+      return dist_info(GetShapeDistanceUnion(PTrans, A.Dist, B.Dist), C + 1 + A.Indx + B.Indx);        \
+    case SHAPE_TYPE_SUBTRACT:                                                                          \
+      return dist_info(GetShapeDistanceSubtract(PTrans, A.Dist, B.Dist), C + 1 + A.Indx + B.Indx);     \
+    case SHAPE_TYPE_INTERSECT:                                                                         \
+      return dist_info(GetShapeDistanceIntersect(PTrans, A.Dist, B.Dist), C + 1 + A.Indx + B.Indx);    \
+    default:                                                                                           \
+      return dist_info(GetShapeDistanceBlend(PTrans, A.Dist, B.Dist, Shapes[I].V1.x), C + 1 + A.Indx + B.Indx);   \
+  }                                                                                                    \
+}
+
+dist_info OverflowFunc( const vec3 P, const int I, const int C )
+{
+  return dist_info(0.0, C + 1);
+}
+
+GSD(GSD1, OverflowFunc)
+
+GSD(GSD2, GSD1)
+
+GSD(GetShapeDistance, GSD2)
 
 dist_info GetDistance( const vec3 P )
 {
-  dist_info best = dist_info(GetShapeDistance(P, Shapes[0]), Shapes[0].Mtl), cur;
-  for (int i = 1; i < NumOfShapes; i++)
+  dist_info best = dist_info(-1.0, -1), cur;
+  for (int i = 0; i < NumOfShapes; i += cur.Indx)
   {
-    cur = dist_info(GetShapeDistance(P, Shapes[i]), Shapes[i].Mtl);
-    best = mix(best, cur, float(best.Dist > cur.Dist));
+    cur = GetShapeDistance(P, i, 0);
+    if (best.Indx == -1 || best.Dist > cur.Dist)
+    {
+      best.Dist = cur.Dist;
+      best.Indx = i;
+    }
   }
 
   return best;
@@ -178,14 +186,16 @@ vec3 GetNormal( const vec3 P )
   return normalize(vec3(gradient_x, gradient_y, gradient_z));
 }
 
-bool RayMarchIsInShadow( const vec3 Org, const vec3 Dir )
+float RayMarchShadow( const vec3 Org, const vec3 Dir, const float K )
 {
-  const int MaxSteps = 32;
+  const int MaxSteps = 200;
   const float MinDist = 0.01;
 
   vec3 CurPos = Org;
   float TotalDist = 0.0;
   dist_info DistNearest;
+
+  float t = 1.0;
 
   for (int i = 0; i < MaxSteps; i++)
   {
@@ -195,15 +205,18 @@ bool RayMarchIsInShadow( const vec3 Org, const vec3 Dir )
     DistNearest = GetDistance(CurPos);
 
     if (DistNearest.Dist < MinDist)
-      return true;
+      return 0.0;
+
+    t = min(t, K * DistNearest.Dist / TotalDist);
 
     TotalDist += DistNearest.Dist;
     CurPos = TotalDist * Dir + Org;
   }
 
-  return false;
+  return t;
 }
 
+int rec = 0;
 
 vec3 RayMarch( const vec3 Org, const vec3 Dir )
 {
@@ -229,19 +242,25 @@ vec3 RayMarch( const vec3 Org, const vec3 Dir )
       vec3 V = normalize(CurPos - CamLoc);
       N = faceforward(N, V, N);
 
-      float shadow = RayMarchIsInShadow(CurPos + L * 0.03, L) ? 0.1 : 1.0;
+      float shadow = RayMarchShadow(CurPos + L * 0.1, L, abs(sin(Time / 10.0)) * 100.0);
+
+      shape S = Shapes[DistNearest.Indx];
+
+      vec3 R = Dir - N * (2.0 * dot(N, Dir));
 
       return 
-        (vec3(min(vec3(0.1), DistNearest.Mtl.Ka.xyz) +
-             max(0.0, dot(N, L)) * DistNearest.Mtl.KdTrans.xyz * LC +
-             pow(max(0.0, dot(reflect(V, N), L)), DistNearest.Mtl.KsPh.w) * DistNearest.Mtl.KsPh.xyz * LC)) * shadow;
+        (vec3(min(vec3(0.1), S.Mtl.Ka.xyz) +
+             max(0.0, dot(N, L)) * S.Mtl.KdTrans.xyz * LC * shadow +
+             pow(max(0.0, dot(reflect(V, N), L)), S.Mtl.KsPh.w) * S.Mtl.KsPh.xyz * LC) * shadow +
+         S.Mtl.KsPh.xyz * texture(Tex, R).xyz * shadow
+        );
     }
 
     TotalDist += abs(DistNearest.Dist);
     CurPos = TotalDist * Dir + Org;
   }
 
-  return vec3(0); // skybox here
+  return texture(Tex, Dir).xyz; // skybox here
 }
 
 void main( void )
@@ -257,7 +276,7 @@ void main( void )
   RayDir = normalize(RayDir);
 
   OutColor = vec4(RayMarch(RayOrg, RayDir), 1);
-  // OutColor = vec4(texture(Tex, -RayDir).xyz, 1);
-  // OutColor = vec4(texture(Tex1, gl_FragCoord.xy / vec2(FrameW, FrameH)).xyz, 1);
-  // OutColor = vec4(texture(Tex1, vec2(atan(RayDir.x, RayDir.z) / (2.0 * acos(-1.0)), acos(-RayDir.y) / acos(-1.0))).xyz, 1);
+  // OutColor = vec4(texture(Tex, RayDir).xyz, 1);
+  // OutColor = vec4(texture(Tex0, gl_FragCoord.xy / vec2(FrameW, FrameH)).xyz, 1);
+  // OutColor = vec4(texture(Tex[0], vec2(atan(RayDir.x, RayDir.z) / (2.0 * acos(-1.0)), acos(-RayDir.y) / acos(-1.0))).xyz, 1);
 }

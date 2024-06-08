@@ -12,6 +12,7 @@ export class unit {
 
 export class animContext extends input {
   rnd: rndContext = new rndContext();
+  scale: number = 1 / 3;
 
   units: unit[] = [];
 
@@ -26,7 +27,7 @@ export class animContext extends input {
   };
 
   resize = (w: number, h: number) => {
-    this.rnd.resize(w, h);
+    this.rnd.resize(this.scale * w, this.scale * h);
   };
 
   camSet = (loc: _vec3, at: _vec3, up1: _vec3) => {
@@ -39,6 +40,9 @@ export class animContext extends input {
 
   response = () => {
     super.response();
+
+    this.mX *= this.scale;
+    this.mY *= this.scale;
 
     if (!this.rnd.UBOutils) return;
     this.rnd.UBOutils.update(

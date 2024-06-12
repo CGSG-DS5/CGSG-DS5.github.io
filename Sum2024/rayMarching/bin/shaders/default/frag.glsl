@@ -45,6 +45,7 @@ out vec4 OutColor;
 #define SHAPE_TYPE_SUBTRACT 4
 #define SHAPE_TYPE_INTERSECT 5
 #define SHAPE_TYPE_BLEND 6
+#define SHAPE_TYPE_TORUS 7
 
 struct material
 {
@@ -105,6 +106,10 @@ float GetShapeDistanceIntersect( const vec3 P, const float A, const float B )
   return max(A, B);
 }
 
+float GetShapeDistanceTorus( const vec3 P, const shape S )
+{
+  return length(length(P.xz) - S.V1.x, P.y) - S.V1.y;
+}
 
 float smin( float a, float b, float k )
 {
@@ -130,6 +135,8 @@ dist_info Name( const vec3 P, const int I, const int C )                        
       return dist_info(GetShapeDistanceBox(PTrans, Shapes[I]), C + 1);                                 \
     case SHAPE_TYPE_SPHERE:                                                                            \
       return dist_info(GetShapeDistanceSphere(PTrans, Shapes[I]), C + 1);                              \
+    case SHAPE_TYPE_TORUS:                                                                             \
+      return dist_info(GetShapeDistanceTorus(PTrans, Shapes[I]), C + 1);                               \
     default:                                                                                           \
       A = Name0(PTrans, I + 1, 0);                                                                     \
       B = Name0(PTrans, I + 1 + A.Indx, 0);                                                            \

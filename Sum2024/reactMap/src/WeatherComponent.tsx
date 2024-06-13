@@ -5,6 +5,7 @@ import {
   Source
 } from '../node_modules/react-map-gl/dist/es5/exports-maplibre';
 import { MapImage } from './MapImage';
+import { countryID } from './countries';
 
 export function WeatherComponent(props: {
   x: number;
@@ -14,6 +15,7 @@ export function WeatherComponent(props: {
   clicked: boolean;
 }) {
   let [weather, setWeather] = useState({
+    country: 'Unknown Country',
     prevTime: 0,
     latitude: 0,
     longitude: 0,
@@ -38,10 +40,15 @@ export function WeatherComponent(props: {
     ).then((data) => {
       if (data == undefined || !data) return;
       data.text().then((text) => {
+        if (text == undefined || !text) return;
         const result = JSON.parse(text);
         // console.log(result);
-        if (text == undefined || !text) return;
+        let c: keyof typeof countryID = result.sys.country;
+
+        if (c == undefined) c = '???';
+
         setWeather({
+          country: countryID[c],
           prevTime: Date.now() / 1000,
           latitude: props.latitude,
           longitude: props.longitude,
@@ -110,6 +117,22 @@ export function WeatherComponent(props: {
     }
   };
 
+  const layerTab2: LayerProps = {
+    type: 'symbol',
+    layout: {
+      'text-anchor': 'bottom',
+      'text-size': 20,
+      'text-allow-overlap': true,
+      'text-field': weather.country,
+      'text-offset': [(-0 * 5) / 4, (-0.5 * 5) / 4],
+      'text-max-width': 5
+    },
+    paint: {
+      // 'text-color': 'rgb(0, 51, 153)'
+      'text-color': 'rgb(102, 204, 255)'
+    }
+  };
+
   function displayWeatherTab() {
     return (
       <div>
@@ -128,6 +151,9 @@ export function WeatherComponent(props: {
         </Source>
         <Source type="geojson" data={geojson}>
           <Layer {...layerTab1} />
+        </Source>
+        <Source type="geojson" data={geojson}>
+          <Layer {...layerTab2} />
         </Source>
       </div>
     );

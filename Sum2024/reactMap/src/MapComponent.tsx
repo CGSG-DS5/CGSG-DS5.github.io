@@ -6,6 +6,7 @@ import Map, {
 } from '../node_modules/react-map-gl/dist/es5/exports-maplibre.js';
 import {
   MapLayerMouseEvent,
+  MapLayerTouchEvent,
   MapLibreEvent
 } from '../node_modules/maplibre-gl/dist/maplibre-gl.js';
 import maplibregl from '../node_modules/maplibre-gl/dist/maplibre-gl.js';
@@ -21,6 +22,18 @@ export function MapComponent() {
   });
 
   function setMouseDblClick(e: MapLayerMouseEvent) {
+    setMouseState({
+      x: e.point.x,
+      y: e.point.y,
+      latitude: e.lngLat.lat,
+      longitude: e.lngLat.lng,
+      clicked: true
+    });
+
+    e.preventDefault();
+  }
+
+  function setMouseTouch(e: MapLayerTouchEvent) {
     setMouseState({
       x: e.point.x,
       y: e.point.y,
@@ -50,6 +63,7 @@ export function MapComponent() {
         }}
         mapStyle="https://api.maptiler.com/maps/basic-v2-dark/style.json?key=082QfNOqotVNQRsJIjnj" //https://demotiles.maplibre.org/style.json
         onDblClick={setMouseDblClick}
+        onTouchCancel={setMouseTouch}
       >
         <WeatherComponent
           x={mouseState.x}

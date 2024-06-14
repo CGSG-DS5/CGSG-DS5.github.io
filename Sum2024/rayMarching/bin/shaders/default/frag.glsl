@@ -108,7 +108,7 @@ float GetShapeDistanceIntersect( const vec3 P, const float A, const float B )
 
 float GetShapeDistanceTorus( const vec3 P, const shape S )
 {
-  return length(length(P.xz) - S.V1.x, P.y) - S.V1.y;
+  return length(vec2(length(P.xz) - S.V1.x, P.y)) - S.V1.y;
 }
 
 float smin( float a, float b, float k )
